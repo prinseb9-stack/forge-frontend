@@ -1,0 +1,33 @@
+[debug] [2026-09-07T13:24:20.486Z] ----------------------------------------------------------------------
+[debug] [2026-09-07T13:24:20.503Z] Command:       /data/data/com.termux/files/usr/bin/node /data/data/com.termux/files/usr/bin/firebase init
+[debug] [2026-09-07T13:24:20.505Z] CLI Version:   15.29.0
+[debug] [2026-09-07T13:24:20.505Z] Platform:      android
+[debug] [2026-09-07T13:24:20.506Z] Node Version:  v24.16.0
+[debug] [2026-09-07T13:24:20.507Z] Detected Agent: unknown
+[debug] [2026-09-07T13:24:20.507Z] Time:          Mon Sep 07 2026 14:24:20 GMT+0100 (West Africa Time)
+[debug] [2026-09-07T13:24:20.507Z] ----------------------------------------------------------------------
+[debug] 
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /data/data/com.termux/files/home/FORGE/frontend
+
+[debug] [2026-09-07T13:25:54.769Z] ExitPromptError: User force closed the prompt with SIGINT
+    at Interface.sigint (/data/data/com.termux/files/usr/lib/node_modules/firebase-tools/node_modules/@inquirer/core/dist/commonjs/lib/create-prompt.js:101:37)
+    at Interface.emit (node:events:509:28)
+    at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1327:18)
+    at ReadStream.onkeypress (node:internal/readline/interface:284:20)
+    at ReadStream.emit (node:events:521:24)
+    at emitKeys (node:internal/readline/utils:371:14)
+    at emitKeys.next (<anonymous>)
+    at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+    at ReadStream.emit (node:events:509:28)
+    at addChunk (node:internal/streams/readable:563:12)
+[error] 
+[error] Error: An unexpected error has occurred.
