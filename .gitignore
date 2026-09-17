@@ -4,3 +4,8 @@ dist/
 .env
 .DS_Store
 .env.production
+
+# Local backups
+*.bak
+*.backup
+*.backup-*

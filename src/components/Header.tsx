@@ -1,8 +1,11 @@
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { signOut } from '../services/auth';
 
 export function Header() {
   const { user } = useAuth();
+  const location = useLocation();
+  const isPlatforms = location.pathname === '/platforms';
 
   async function handleSignOut() {
     try {
@@ -15,10 +18,27 @@ export function Header() {
   return (
     <header className="header">
       <div className="header-content">
-        <div className="logo-container">
+        <Link to="/" className="logo-container logo-link">
           <h1 className="logo">⚡ FORGE</h1>
           <span className="tagline">AI Content Studio</span>
-        </div>
+        </Link>
+
+        {user && (
+          <nav className="header-nav">
+            <Link
+              to="/"
+              className={`header-nav-link ${!isPlatforms ? 'active' : ''}`}
+            >
+              Dashboard
+            </Link>
+            <Link
+              to="/platforms"
+              className={`header-nav-link ${isPlatforms ? 'active' : ''}`}
+            >
+              Platforms
+            </Link>
+          </nav>
+        )}
 
         {user && (
           <div className="header-actions">

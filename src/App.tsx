@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { PaymentCallback } from './pages/PaymentCallback';
+import { Platforms } from './pages/Platforms';
 import './App.css';
 
 function AppRouter() {
@@ -21,6 +22,10 @@ function AppRouter() {
       <Route
         path="/payment/callback"
         element={user ? <PaymentCallback /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/platforms"
+        element={user ? <Platforms /> : <Navigate to="/" replace />}
       />
       <Route
         path="/"
