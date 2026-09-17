@@ -134,3 +134,47 @@ export async function getMe(): Promise<MeResponse> {
     return { success: false, error: 'Network error' };
   }
 }
+
+// ═══ Payments ═══
+export interface CheckoutResponse {
+  success: boolean;
+  checkoutURL?: string;
+  error?: string;
+  code?: string;
+}
+
+export interface SubscriptionResponse {
+  success: boolean;
+  plan: string;
+  subscription?: {
+    provider: string;
+    planName: string;
+    status: string;
+    currentPeriodEnd: string;
+  };
+  error?: string;
+}
+
+export async function createCheckout(
+  plan: 'pro' | 'higher_pro'
+): Promise<CheckoutResponse> {
+  const { json } = await authedFetch('/api/payments/checkout', { plan });
+  return json as CheckoutResponse;
+}
+
+export async function getSubscription(): Promise<SubscriptionResponse> {
+  const token = await getIdToken();
+  if (!token) return { success: false, plan: 'free', error: 'Not signed in' };
+
+  try {
+    const res = await fetch(`${API_URL}/api/subscription`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const text = await res.text();
+    if (!text) return { success: false, plan: 'free', error: 'Server error' };
+    return JSON.parse(text) as SubscriptionResponse;
+  } catch {
+    return { success: false, plan: 'free', error: 'Network error' };
+  }
+}

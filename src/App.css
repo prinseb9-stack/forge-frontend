@@ -1296,3 +1296,89 @@
     align-items: stretch;
   }
 }
+
+/* ═══ Modal upgrade button — now active ═══ */
+.modal-upgrade-btn {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.modal-upgrade-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.modal-upgrade-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modal-error {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* ═══ Payment Callback Page ═══ */
+.payment-callback {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: #0a0a0f;
+}
+
+.payment-callback-card {
+  max-width: 480px;
+  width: 100%;
+  padding: 3rem 2rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  text-align: center;
+}
+
+.payment-callback-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.payment-callback h2 {
+  margin: 0 0 0.75rem;
+  color: #f9fafb;
+}
+
+.payment-callback p {
+  color: #9ca3af;
+  margin: 0 0 1rem;
+}
+
+.payment-callback-hint {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.payment-callback-btn {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}

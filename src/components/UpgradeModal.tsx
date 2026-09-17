@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { createCheckout } from '../services/api';
 
 interface UpgradeModalProps {
   open: boolean;
@@ -13,7 +14,32 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   reason,
   requiredPlan = 'pro',
 }) => {
+  const [loading, setLoading] = useState<'pro' | 'higher_pro' | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   if (!open) return null;
+
+  async function handleUpgrade(plan: 'pro' | 'higher_pro') {
+    setLoading(plan);
+    setError(null);
+
+    try {
+      const response = await createCheckout(plan);
+
+      if (!response.success || !response.checkoutURL) {
+        setError(response.error ?? 'Failed to start checkout');
+        return;
+      }
+
+      // Redirect to Flutterwave checkout
+      window.location.href = response.checkoutURL;
+    } catch (err) {
+      console.error(err);
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(null);
+    }
+  }
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -42,6 +68,13 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
               <li>✅ 10 videos/mo</li>
               <li>✅ Generation history</li>
             </ul>
+            <button
+              className="modal-upgrade-btn"
+              onClick={() => handleUpgrade('pro')}
+              disabled={loading !== null}
+            >
+              {loading === 'pro' ? 'Redirecting…' : 'Upgrade to Pro'}
+            </button>
           </div>
 
           <div className={`pricing-card ${requiredPlan === 'higher_pro' ? 'pricing-card-featured' : ''}`}>
@@ -57,15 +90,21 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
               <li>✅ Custom brand voices</li>
               <li>✅ Priority support</li>
             </ul>
+            <button
+              className="modal-upgrade-btn"
+              onClick={() => handleUpgrade('higher_pro')}
+              disabled={loading !== null}
+            >
+              {loading === 'higher_pro' ? 'Redirecting…' : 'Upgrade to Higher Pro'}
+            </button>
           </div>
         </div>
 
+        {error && <div className="modal-error">{error}</div>}
+
         <div className="modal-footer">
-          <button className="modal-upgrade-btn" disabled>
-            💳 Coming soon — payment integration in progress
-          </button>
           <p className="modal-footer-hint">
-            We're launching soon. Your account will remain free until then.
+            Secure payment powered by Flutterwave. Cancel anytime.
           </p>
         </div>
       </div>

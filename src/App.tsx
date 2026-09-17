@@ -1,10 +1,13 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
+import { PaymentCallback } from './pages/PaymentCallback';
 import './App.css';
-import { InstallPrompt } from './components/InstallPrompt';
+
 function AppRouter() {
   const { user, loading } = useAuth();
+
   if (loading) {
     return (
       <div className="app-loading">
@@ -13,17 +16,29 @@ function AppRouter() {
     );
   }
 
-  return user ? <Dashboard /> : <Login />;
+  return (
+    <Routes>
+      <Route
+        path="/payment/callback"
+        element={user ? <PaymentCallback /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/"
+        element={user ? <Dashboard /> : <Login />}
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <AppRouter />
-      <InstallPrompt />
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRouter />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
 export default App;
-// trigger rebuild Tue Sep 15 17:15:40 WAT 2026
