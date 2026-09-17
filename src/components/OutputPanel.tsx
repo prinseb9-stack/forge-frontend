@@ -5,6 +5,7 @@ interface OutputPanelProps {
   results: GeneratedContent[] | null;
   isLoading: boolean;
   error: string | null;
+  onShare?: (content: GeneratedContent) => void;
 }
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -20,6 +21,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
   results,
   isLoading,
   error,
+  onShare,
 }) => {
   function copyOne(content: string) {
     navigator.clipboard.writeText(content);
@@ -71,13 +73,24 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
               <span className="output-result-platform">
                 {PLATFORM_LABELS[r.platform] ?? r.platform}
               </span>
-              <button
-                onClick={() => copyOne(r.content)}
-                className="copy-btn"
-                type="button"
-              >
-                📋 Copy
-              </button>
+              <div className="output-result-actions">
+                <button
+                  onClick={() => copyOne(r.content)}
+                  className="copy-btn"
+                  type="button"
+                >
+                  📋 Copy
+                </button>
+                {onShare && (
+                  <button
+                    onClick={() => onShare(r)}
+                    className="share-btn"
+                    type="button"
+                  >
+                    📤 Share
+                  </button>
+                )}
+              </div>
             </div>
             <pre className="output-result-content">{r.content}</pre>
           </div>

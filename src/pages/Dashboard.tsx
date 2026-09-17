@@ -11,6 +11,7 @@ import { ImageGenerator } from '../components/ImageGenerator';
 import { UpgradeModal } from '../components/UpgradeModal';
 import { generateContent, getMe, type UsageInfo, type MeUserInfo } from '../services/api';
 import type { Platform, GeneratedContent } from '../types';
+import { ShareModal } from '../components/ShareModal';
 
 const PLAN_LIMITS = {
   free:         { maxWords: 500,    maxPlatforms: 1 },
@@ -29,6 +30,8 @@ export function Dashboard() {
   const [results, setResults] = useState<GeneratedContent[] | null>(null);
   const [usage, setUsage] = useState<UsageInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+const [shareTarget, setShareTarget] = useState<GeneratedContent | null>(null);
 
   // Upgrade modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -162,7 +165,15 @@ export function Dashboard() {
               />
             </div>
             <div className="output-section">
-              <OutputPanel results={results} isLoading={isLoading} error={error} />
+              <OutputPanel
+  results={results}
+  isLoading={isLoading}
+  error={error}
+  onShare={(content) => {
+    setShareTarget(content);
+    setShareOpen(true);
+  }}
+/>
             </div>
           </div>
         )}
@@ -175,6 +186,14 @@ export function Dashboard() {
       </main>
       <Footer />
 
+<ShareModal
+  open={shareOpen}
+  onClose={() => {
+    setShareOpen(false);
+    setShareTarget(null);
+  }}
+  contentPreview={shareTarget?.content}
+/>
       <UpgradeModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
