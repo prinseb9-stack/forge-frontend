@@ -12,6 +12,7 @@ import { UpgradeModal } from '../components/UpgradeModal';
 import { generateContent, getMe, type UsageInfo, type MeUserInfo } from '../services/api';
 import type { Platform, GeneratedContent } from '../types';
 import { ShareModal } from '../components/ShareModal';
+import { ScheduleModal } from '../components/ScheduleModal';
 
 const PLAN_LIMITS = {
   free:         { maxWords: 500,    maxPlatforms: 1 },
@@ -30,8 +31,14 @@ export function Dashboard() {
   const [results, setResults] = useState<GeneratedContent[] | null>(null);
   const [usage, setUsage] = useState<UsageInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Share modal state
   const [shareOpen, setShareOpen] = useState(false);
-const [shareTarget, setShareTarget] = useState<GeneratedContent | null>(null);
+  const [shareTarget, setShareTarget] = useState<GeneratedContent | null>(null);
+
+  // Schedule modal state
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [scheduleTarget, setScheduleTarget] = useState<GeneratedContent | null>(null);
 
   // Upgrade modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -73,7 +80,6 @@ const [shareTarget, setShareTarget] = useState<GeneratedContent | null>(null);
       });
 
       if (!response.success) {
-        // Handle plan-related errors with modal
         if (
           response.code === 'PLATFORM_LIMIT_EXCEEDED' ||
           response.code === 'INPUT_TOO_LONG'
@@ -166,14 +172,18 @@ const [shareTarget, setShareTarget] = useState<GeneratedContent | null>(null);
             </div>
             <div className="output-section">
               <OutputPanel
-  results={results}
-  isLoading={isLoading}
-  error={error}
-  onShare={(content) => {
-    setShareTarget(content);
-    setShareOpen(true);
-  }}
-/>
+                results={results}
+                isLoading={isLoading}
+                error={error}
+                onShare={(content) => {
+                  setShareTarget(content);
+                  setShareOpen(true);
+                }}
+                onSchedule={(content) => {
+                  setScheduleTarget(content);
+                  setScheduleOpen(true);
+                }}
+              />
             </div>
           </div>
         )}
@@ -186,14 +196,25 @@ const [shareTarget, setShareTarget] = useState<GeneratedContent | null>(null);
       </main>
       <Footer />
 
-<ShareModal
-  open={shareOpen}
-  onClose={() => {
-    setShareOpen(false);
-    setShareTarget(null);
-  }}
-  contentPreview={shareTarget?.content}
-/>
+      <ShareModal
+        open={shareOpen}
+        onClose={() => {
+          setShareOpen(false);
+          setShareTarget(null);
+        }}
+        contentPreview={shareTarget?.content}
+      />
+
+      <ScheduleModal
+        open={scheduleOpen}
+        onClose={() => {
+          setScheduleOpen(false);
+          setScheduleTarget(null);
+        }}
+        platform={scheduleTarget?.platform ?? 'x'}
+        content={scheduleTarget?.content ?? ''}
+      />
+
       <UpgradeModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

@@ -178,3 +178,123 @@ export async function getSubscription(): Promise<SubscriptionResponse> {
     return { success: false, plan: 'free', error: 'Network error' };
   }
 }
+
+// ═══ Scheduled Posts (Feature #4) ═══
+
+export type ScheduledPostStatus = 'pending' | 'posted' | 'failed' | 'cancelled';
+
+export interface ScheduledPost {
+  id: string;
+  uid: string;
+  platform: string;
+  content: string;
+  scheduledFor: string;
+  status: ScheduledPostStatus;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateScheduledPostInput {
+  platform: string;
+  content: string;
+  scheduledFor: string;
+  notes?: string;
+}
+
+export interface CreateScheduledPostResponse {
+  success: boolean;
+  post?: ScheduledPost;
+  error?: string;
+  code?: string;
+}
+
+export interface ListScheduledPostsResponse {
+  success: boolean;
+  posts: ScheduledPost[];
+  error?: string;
+}
+
+export interface DeleteScheduledPostResponse {
+  success: boolean;
+  error?: string;
+}
+
+// Authenticated GET helper (does NOT modify authedFetch)
+async function authedGet(
+  path: string
+): Promise<{ status: number; json: unknown }> {
+  const token = await getIdToken();
+  if (!token) {
+    return { status: 401, json: { success: false, error: 'Not signed in' } };
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    return { status: 0, json: { success: false, error: 'Network error' } };
+  }
+
+  const text = await res.text();
+  if (!text) {
+    return { status: res.status, json: { success: false, error: `Server returned ${res.status}` } };
+  }
+  try {
+    return { status: res.status, json: JSON.parse(text) };
+  } catch {
+    return { status: res.status, json: { success: false, error: 'Invalid response' } };
+  }
+}
+
+// Authenticated DELETE helper
+async function authedDelete(
+  path: string
+): Promise<{ status: number; json: unknown }> {
+  const token = await getIdToken();
+  if (!token) {
+    return { status: 401, json: { success: false, error: 'Not signed in' } };
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    return { status: 0, json: { success: false, error: 'Network error' } };
+  }
+
+  const text = await res.text();
+  if (!text) {
+    return { status: res.status, json: { success: true } };
+  }
+  try {
+    return { status: res.status, json: JSON.parse(text) };
+  } catch {
+    return { status: res.status, json: { success: false, error: 'Invalid response' } };
+  }
+}
+
+export async function createScheduledPost(
+  input: CreateScheduledPostInput
+): Promise<CreateScheduledPostResponse> {
+  const { json } = await authedFetch('/api/scheduled', input);
+  return json as CreateScheduledPostResponse;
+}
+
+export async function getScheduledPosts(): Promise<ListScheduledPostsResponse> {
+  const { json } = await authedGet('/api/scheduled');
+  return json as ListScheduledPostsResponse;
+}
+
+export async function deleteScheduledPost(
+  id: string
+): Promise<DeleteScheduledPostResponse> {
+  const { json } = await authedDelete(`/api/scheduled/${encodeURIComponent(id)}`);
+  return json as DeleteScheduledPostResponse;
+}

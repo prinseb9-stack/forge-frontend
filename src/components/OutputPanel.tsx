@@ -6,6 +6,7 @@ interface OutputPanelProps {
   isLoading: boolean;
   error: string | null;
   onShare?: (content: GeneratedContent) => void;
+  onSchedule?: (content: GeneratedContent) => void;
 }
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -15,6 +16,10 @@ const PLATFORM_LABELS: Record<string, string> = {
   linkedin: 'LinkedIn',
   blog: 'Blog',
   newsletter: 'Newsletter',
+  threads: 'Threads',
+  tiktok: 'TikTok',
+  'youtube-shorts': 'YouTube Shorts',
+  pinterest: 'Pinterest',
 };
 
 export const OutputPanel: React.FC<OutputPanelProps> = ({
@@ -22,6 +27,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
   isLoading,
   error,
   onShare,
+  onSchedule,
 }) => {
   function copyOne(content: string) {
     navigator.clipboard.writeText(content);
@@ -88,6 +94,15 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
                     type="button"
                   >
                     📤 Share
+                  </button>
+                )}
+                {onSchedule && (
+                  <button
+                    onClick={() => onSchedule(r)}
+                    className="schedule-btn"
+                    type="button"
+                  >
+                    📅 Schedule
                   </button>
                 )}
               </div>

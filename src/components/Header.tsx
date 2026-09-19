@@ -5,6 +5,9 @@ import { signOut } from '../services/auth';
 export function Header() {
   const { user } = useAuth();
   const location = useLocation();
+
+  const isDashboard = location.pathname === '/';
+  const isScheduled = location.pathname === '/scheduled';
   const isPlatforms = location.pathname === '/platforms';
 
   async function handleSignOut() {
@@ -25,11 +28,14 @@ export function Header() {
 
         {user && (
           <nav className="header-nav">
-            <Link
-              to="/"
-              className={`header-nav-link ${!isPlatforms ? 'active' : ''}`}
-            >
+            <Link to="/" className={`header-nav-link ${isDashboard ? 'active' : ''}`}>
               Dashboard
+            </Link>
+            <Link
+              to="/scheduled"
+              className={`header-nav-link ${isScheduled ? 'active' : ''}`}
+            >
+              Scheduled
             </Link>
             <Link
               to="/platforms"
