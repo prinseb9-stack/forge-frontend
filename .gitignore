@@ -9,3 +9,4 @@ dist/
 *.bak
 *.backup
 *.backup-*
+*.header-bak

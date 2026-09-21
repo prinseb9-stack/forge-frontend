@@ -2332,3 +2332,14 @@
     font-size: 0.8rem;
   }
 }
+
+/* ═══ Copy button: "Copied!" state ═══ */
+.copy-btn.copied {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #86efac;
+}
+
+.copy-btn.copied:hover {
+  background: rgba(34, 197, 94, 0.2);
+}

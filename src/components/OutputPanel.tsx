@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { GeneratedContent } from '../types';
 
 interface OutputPanelProps {
@@ -22,6 +22,8 @@ const PLATFORM_LABELS: Record<string, string> = {
   pinterest: 'Pinterest',
 };
 
+const COPY_FEEDBACK_MS = 1500;
+
 export const OutputPanel: React.FC<OutputPanelProps> = ({
   results,
   isLoading,
@@ -29,8 +31,39 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
   onShare,
   onSchedule,
 }) => {
-  function copyOne(content: string) {
-    navigator.clipboard.writeText(content);
+  // Tracks which result's Copy button was most recently clicked so we
+  // can show per-card "Copied!" feedback without affecting other cards.
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const timerRef = useRef<number | null>(null);
+
+  // Clear any pending timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) {
+        window.clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
+  async function copyOne(id: string, content: string) {
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch {
+      // Clipboard API can fail on insecure contexts. Fail silently —
+      // the button just won't show "Copied!".
+      return;
+    }
+
+    // Cancel any previous timer so rapid clicks reset cleanly
+    if (timerRef.current !== null) {
+      window.clearTimeout(timerRef.current);
+    }
+
+    setCopiedId(id);
+    timerRef.current = window.setTimeout(() => {
+      setCopiedId(null);
+      timerRef.current = null;
+    }, COPY_FEEDBACK_MS);
   }
 
   if (isLoading) {
@@ -73,43 +106,47 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
         <span className="output-count">{results.length} platforms</span>
       </div>
       <div className="output-results">
-        {results.map((r) => (
-          <div key={r.id} className="output-result-card">
-            <div className="output-result-header">
-              <span className="output-result-platform">
-                {PLATFORM_LABELS[r.platform] ?? r.platform}
-              </span>
-              <div className="output-result-actions">
-                <button
-                  onClick={() => copyOne(r.content)}
-                  className="copy-btn"
-                  type="button"
-                >
-                  📋 Copy
-                </button>
-                {onShare && (
+        {results.map((r) => {
+          const justCopied = copiedId === r.id;
+          return (
+            <div key={r.id} className="output-result-card">
+              <div className="output-result-header">
+                <span className="output-result-platform">
+                  {PLATFORM_LABELS[r.platform] ?? r.platform}
+                </span>
+                <div className="output-result-actions">
                   <button
-                    onClick={() => onShare(r)}
-                    className="share-btn"
+                    onClick={() => copyOne(r.id, r.content)}
+                    className={`copy-btn ${justCopied ? 'copied' : ''}`}
                     type="button"
+                    aria-live="polite"
                   >
-                    📤 Share
+                    {justCopied ? '✅ Copied!' : '📋 Copy'}
                   </button>
-                )}
-                {onSchedule && (
-                  <button
-                    onClick={() => onSchedule(r)}
-                    className="schedule-btn"
-                    type="button"
-                  >
-                    📅 Schedule
-                  </button>
-                )}
+                  {onShare && (
+                    <button
+                      onClick={() => onShare(r)}
+                      className="share-btn"
+                      type="button"
+                    >
+                      📤 Share
+                    </button>
+                  )}
+                  {onSchedule && (
+                    <button
+                      onClick={() => onSchedule(r)}
+                      className="schedule-btn"
+                      type="button"
+                    >
+                      📅 Schedule
+                    </button>
+                  )}
+                </div>
               </div>
+              <pre className="output-result-content">{r.content}</pre>
             </div>
-            <pre className="output-result-content">{r.content}</pre>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
