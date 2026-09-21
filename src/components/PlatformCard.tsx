@@ -1,13 +1,13 @@
 import React from 'react';
-import type { PlatformCatalogEntry } from '../data/platforms';
+import type { ConnectorInfo, CapabilityStatus } from '../types/connectors';
 import {
   CAPABILITY_LABELS,
   CAPABILITY_ICONS,
   isConnectable,
-} from '../data/platforms';
+} from '../types/connectors';
 
 interface PlatformCardProps {
-  platform: PlatformCatalogEntry;
+  platform: ConnectorInfo;
 }
 
 export const PlatformCard: React.FC<PlatformCardProps> = ({ platform }) => {
@@ -49,7 +49,7 @@ export const PlatformCard: React.FC<PlatformCardProps> = ({ platform }) => {
 
 interface CapabilityRowProps {
   label: string;
-  status: 'available' | 'planned' | 'coming_soon';
+  status: CapabilityStatus;
 }
 
 const CapabilityRow: React.FC<CapabilityRowProps> = ({ label, status }) => {

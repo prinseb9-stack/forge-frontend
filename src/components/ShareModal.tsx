@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PLATFORMS, CAPABILITY_LABELS, CAPABILITY_ICONS } from '../data/platforms';
+import { getConnectors } from '../services/api';
+import {
+  FALLBACK_CONNECTORS,
+  CAPABILITY_LABELS,
+  CAPABILITY_ICONS,
+  type ConnectorInfo,
+} from '../types/connectors';
 
 interface ShareModalProps {
   open: boolean;
   onClose: () => void;
-  /** Optional: the content the user is trying to share */
   contentPreview?: string;
 }
 
@@ -15,6 +20,30 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   contentPreview,
 }) => {
   const navigate = useNavigate();
+  const [connectors, setConnectors] = useState<ConnectorInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+
+    (async () => {
+      setIsLoading(true);
+      const response = await getConnectors();
+      if (cancelled) return;
+
+      if (response.success && response.connectors.length > 0) {
+        setConnectors(response.connectors);
+      } else {
+        setConnectors(FALLBACK_CONNECTORS);
+      }
+      setIsLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   if (!open) return null;
 
@@ -33,9 +62,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         <div className="modal-header">
           <span className="modal-icon">📤</span>
           <h2 className="modal-title">Share to Platforms</h2>
-          <p className="modal-reason">
-            Choose where to send this content.
-          </p>
+          <p className="modal-reason">Choose where to send this content.</p>
         </div>
 
         {contentPreview && (
@@ -50,7 +77,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         )}
 
         <div className="share-platform-list">
-          {PLATFORMS.map((platform) => {
+          {isLoading && (
+            <div className="share-modal-loading">
+              <div className="loading-spinner"></div>
+            </div>
+          )}
+
+          {!isLoading && connectors.map((platform) => {
             // Feature #2 — no platforms are connected yet (OAuth not built).
             // Every row shows "Not connected" and is disabled.
             const connectable = platform.capabilities.connect === 'available';
@@ -64,9 +97,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                 <div className="share-platform-info">
                   <div className="share-platform-name">{platform.name}</div>
                   <div className="share-platform-status">
-                    {connectable
-                      ? 'Ready to share'
-                      : 'Not connected'}
+                    {connectable ? 'Ready to share' : 'Not connected'}
                   </div>
                 </div>
                 <span className="share-platform-checkbox">

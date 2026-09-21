@@ -2054,3 +2054,51 @@
   .schedule-modal-card { padding: 1.5rem; }
   .schedule-row { flex-direction: column; gap: 0; }
 }
+
+/* ═══ Platforms loading + fallback ═══ */
+.platforms-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  color: #9ca3af;
+}
+
+.platforms-fallback-notice {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ═══ Platforms loading + fallback ═══ */
+.platforms-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  color: #9ca3af;
+}
+
+.platforms-fallback-notice {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.share-modal-loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}

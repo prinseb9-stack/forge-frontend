@@ -1,4 +1,12 @@
 import { getIdToken } from './auth';
+import type { ConnectorsResponse } from '../types/connectors';
+
+export type {
+  CapabilityStatus,
+  PlatformCapabilities,
+  ConnectorInfo,
+  ConnectorsResponse,
+} from '../types/connectors';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
@@ -297,4 +305,54 @@ export async function deleteScheduledPost(
 ): Promise<DeleteScheduledPostResponse> {
   const { json } = await authedDelete(`/api/scheduled/${encodeURIComponent(id)}`);
   return json as DeleteScheduledPostResponse;
+}
+
+/**
+ * Fetches the connector catalog from the backend.
+ *
+ * This endpoint is public (no auth required). If the backend is
+ * unreachable, the caller is responsible for using a fallback.
+ */
+export async function getConnectors(): Promise<ConnectorsResponse> {
+  try {
+    const res = await fetch(`${API_URL}/api/connectors`, {
+      method: 'GET',
+    });
+
+    if (!res.ok) {
+      return {
+        success: false,
+        connectors: [],
+        count: 0,
+        error: `Server returned ${res.status}`,
+      };
+    }
+
+    const text = await res.text();
+    if (!text) {
+      return {
+        success: false,
+        connectors: [],
+        count: 0,
+        error: 'Empty response from server',
+      };
+    }
+
+    const data = JSON.parse(text) as ConnectorsResponse;
+
+    // Defensive: make sure connectors array exists
+    if (!Array.isArray(data.connectors)) {
+      data.connectors = [];
+      data.count = 0;
+    }
+
+    return data;
+  } catch (err) {
+    return {
+      success: false,
+      connectors: [],
+      count: 0,
+      error: 'Network error',
+    };
+  }
 }
