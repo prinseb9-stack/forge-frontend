@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { PlatformCard } from '../components/PlatformCard';
@@ -8,10 +8,25 @@ import {
   type ConnectorInfo,
 } from '../types/connectors';
 
+// Category filter options (labels are pretty-cased versions of the
+// backend's category values).
+const CATEGORY_OPTIONS: { value: string; label: string }[] = [
+  { value: 'all',          label: 'All' },
+  { value: 'social',       label: 'Social' },
+  { value: 'professional', label: 'Professional' },
+  { value: 'visual',       label: 'Visual' },
+  { value: 'video',        label: 'Video' },
+  { value: 'publishing',   label: 'Publishing' },
+  { value: 'messaging',    label: 'Messaging' },
+];
+
 export function Platforms() {
   const [connectors, setConnectors] = useState<ConnectorInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [usedFallback, setUsedFallback] = useState(false);
+
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('all');
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +51,33 @@ export function Platforms() {
     };
   }, []);
 
+  // ─── Filtering ───
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    return connectors.filter((c) => {
+      // Category filter
+      if (category !== 'all' && c.category !== category) return false;
+
+      // Search filter — match against id, name, or description
+      if (q) {
+        const haystack = `${c.id} ${c.name} ${c.description}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+
+      return true;
+    });
+  }, [connectors, category, search]);
+
+  const totalCount = connectors.length;
+  const visibleCount = filtered.length;
+  const isFiltered = category !== 'all' || search.trim().length > 0;
+
+  function clearFilters() {
+    setSearch('');
+    setCategory('all');
+  }
+
   return (
     <div className="app">
       <Header />
@@ -57,6 +99,39 @@ export function Platforms() {
             </div>
           )}
 
+          {/* Filters */}
+          {!isLoading && connectors.length > 0 && (
+            <div className="platforms-filters">
+              <input
+                type="search"
+                className="platforms-search"
+                placeholder="Search platforms…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                aria-label="Search platforms"
+              />
+
+              <div className="platforms-category-chips">
+                {CATEGORY_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`platforms-chip ${category === opt.value ? 'active' : ''}`}
+                    onClick={() => setCategory(opt.value)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              {isFiltered && (
+                <div className="platforms-filter-summary">
+                  Showing {visibleCount} of {totalCount} platforms
+                </div>
+              )}
+            </div>
+          )}
+
           {isLoading && (
             <div className="platforms-loading">
               <div className="loading-spinner"></div>
@@ -64,11 +139,26 @@ export function Platforms() {
             </div>
           )}
 
-          {!isLoading && connectors.length > 0 && (
+          {!isLoading && filtered.length > 0 && (
             <div className="platforms-grid">
-              {connectors.map((platform) => (
+              {filtered.map((platform) => (
                 <PlatformCard key={platform.id} platform={platform} />
               ))}
+            </div>
+          )}
+
+          {!isLoading && connectors.length > 0 && filtered.length === 0 && (
+            <div className="platforms-no-results">
+              <div className="platforms-no-results-icon">🔍</div>
+              <h3>No platforms match your filter</h3>
+              <p>Try a different search or category.</p>
+              <button
+                type="button"
+                className="platforms-clear-btn"
+                onClick={clearFilters}
+              >
+                Clear filters
+              </button>
             </div>
           )}
 
