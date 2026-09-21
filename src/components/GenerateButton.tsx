@@ -14,14 +14,14 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
   return (
     <div className="generate-button-container">
       <button
-        className="generate-btn"
+        className={`generate-btn ${isLoading ? 'generating' : ''}`}
         onClick={onClick}
         disabled={isDisabled || isLoading}
       >
         {isLoading ? (
           <>
             <span className="spinner">⟳</span>
-            Generating...
+            Generating…
           </>
         ) : (
           '⚡ Generate Content'

@@ -2343,3 +2343,37 @@
 .copy-btn.copied:hover {
   background: rgba(34, 197, 94, 0.2);
 }
+
+/* ═══ Loading state enhancements ═══ */
+.loading-title {
+  color: #d1d5db;
+  font-size: 0.95rem;
+  margin: 0 0 0.25rem;
+}
+
+.loading-hint {
+  color: #6b7280;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+/* Generate button — pulse while generating */
+.generate-btn.generating {
+  animation: generatePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes generatePulse {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.75; }
+}
+
+/* Respect users who prefer no animation */
+@media (prefers-reduced-motion: reduce) {
+  .generate-btn.generating {
+    animation: none;
+    opacity: 0.5;
+  }
+  .loading-spinner {
+    animation-duration: 3s; /* slower rotation, still visible */
+  }
+}

@@ -71,7 +71,8 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
       <div className="output-panel loading">
         <div className="loading-state">
           <div className="loading-spinner"></div>
-          <p>Generating your content...</p>
+          <p className="loading-title">Generating your content…</p>
+          <p className="loading-hint">This may take up to 20 seconds.</p>
         </div>
       </div>
     );
