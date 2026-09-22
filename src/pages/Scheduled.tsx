@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import {
@@ -25,6 +26,7 @@ const PLATFORM_LABELS: Record<string, string> = {
 };
 
 export function Scheduled() {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<ScheduledPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,11 +95,23 @@ export function Scheduled() {
 
           {!isLoading && posts.length === 0 && !error && (
             <div className="scheduled-empty">
-              <div className="scheduled-empty-icon">📭</div>
+              <div className="scheduled-empty-icon">📅</div>
               <h3>No scheduled posts yet</h3>
               <p>
-                Generate content on the Dashboard and click <strong>📅 Schedule</strong> on any result.
+                Generate content on the Dashboard and click{' '}
+                <strong>📅 Schedule</strong> on any result to queue it here.
               </p>
+              <p className="scheduled-empty-hint">
+                Scheduled posts are saved for later. Automatic publishing
+                requires connecting your accounts (coming soon).
+              </p>
+              <button
+                type="button"
+                className="scheduled-empty-cta"
+                onClick={() => navigate('/')}
+              >
+                Go to Dashboard
+              </button>
             </div>
           )}
 
