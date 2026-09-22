@@ -129,18 +129,31 @@ export function Dashboard() {
 
         {/* Usage banner */}
         {!meLoading && usage && (
-          <div className={`usage-banner ${usage.limit === -1 ? 'usage-banner-unlimited' : ''}`}>
+          <div className="usage-banner-wrap">
             {usage.limit === -1 ? (
-              <span className="usage-label">✨ Unlimited generations</span>
+              <div className="usage-banner usage-banner-unlimited">
+                <span className="usage-label">✨ Unlimited generations</span>
+              </div>
             ) : (
-              <>
-                <span className="usage-label">
-                  {currentPlan} plan: <strong>{usage.used}/{usage.limit}</strong> used
-                </span>
-                <span className="usage-hint">
+              <div className="usage-banner usage-banner-with-bar">
+                <div className="usage-row">
+                  <span className="usage-label">
+                    {currentPlan} plan
+                  </span>
+                  <span className="usage-count">
+                    <strong>{usage.used}</strong> / {usage.limit} used
+                  </span>
+                </div>
+                <div className="usage-bar" role="progressbar" aria-valuenow={usage.used} aria-valuemin={0} aria-valuemax={usage.limit}>
+                  <div
+                    className={`usage-bar-fill usage-bar-fill-${getUsageLevel(usage.used, usage.limit)}`}
+                    style={{ width: `${getUsagePercent(usage.used, usage.limit)}%` }}
+                  />
+                </div>
+                <div className="usage-hint">
                   {usage.remaining} remaining this period
-                </span>
-              </>
+                </div>
+              </div>
             )}
           </div>
         )}
@@ -237,4 +250,19 @@ export function Dashboard() {
       )}
     </div>
   );
+}
+
+// ═══ Usage bar helpers (Polish #5) ═══
+
+function getUsagePercent(used: number, limit: number): number {
+  if (limit <= 0) return 0;
+  const pct = (used / limit) * 100;
+  return Math.min(100, Math.max(0, Math.round(pct)));
+}
+
+function getUsageLevel(used: number, limit: number): 'safe' | 'warn' | 'critical' {
+  const pct = getUsagePercent(used, limit);
+  if (pct >= 90) return 'critical';
+  if (pct >= 60) return 'warn';
+  return 'safe';
 }

@@ -623,18 +623,57 @@
 }
 
 /* ═══ Usage banner ═══ */
-.usage-banner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
+.usage-banner-wrap {
   margin-bottom: 1rem;
+}
+
+.usage-banner {
+  padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   background: rgba(99, 102, 241, 0.08);
   border: 1px solid rgba(99, 102, 241, 0.2);
   color: #c7d2fe;
   font-size: 0.875rem;
 }
+
+.usage-banner-with-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.usage-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.usage-count {
+  color: #a5b4fc;
+  font-size: 0.875rem;
+}
+
+.usage-count strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.usage-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.usage-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease-out, background-color 0.3s;
+}
+
+.usage-bar-fill-safe     { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+.usage-bar-fill-warn     { background: linear-gradient(90deg, #f59e0b, #f97316); }
+.usage-bar-fill-critical { background: linear-gradient(90deg, #ef4444, #dc2626); }
 
 .usage-banner-unlimited {
   justify-content: center;
