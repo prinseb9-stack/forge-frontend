@@ -13,6 +13,7 @@ import { generateContent, getMe, type UsageInfo, type MeUserInfo } from '../serv
 import type { Platform, GeneratedContent } from '../types';
 import { ShareModal } from '../components/ShareModal';
 import { ScheduleModal } from '../components/ScheduleModal';
+import { Toast } from '../components/Toast';
 
 const PLAN_LIMITS = {
   free:         { maxWords: 500,    maxPlatforms: 1 },
@@ -39,6 +40,9 @@ export function Dashboard() {
   // Schedule modal state
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [scheduleTarget, setScheduleTarget] = useState<GeneratedContent | null>(null);
+
+  // Transient success/info toast (Polish #8)
+  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'info' | 'error' } | null>(null);
 
   // Upgrade modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -72,6 +76,7 @@ export function Dashboard() {
     setIsLoading(true);
     setError(null);
     setResults(null);
+    setToast(null);
 
     try {
       const response = await generateContent({
@@ -102,6 +107,7 @@ export function Dashboard() {
 
       setResults(normalized);
       if (response.usage) setUsage(response.usage);
+      setToast({ message: 'Content generated', variant: 'success' });
     } catch (err) {
       console.error(err);
       setError('Network error. Please try again.');
@@ -221,6 +227,14 @@ export function Dashboard() {
         reason={modalReason}
         requiredPlan={currentPlan === 'free' ? 'pro' : 'higher_pro'}
       />
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          variant={toast.variant}
+          onDismiss={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }
