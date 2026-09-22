@@ -22,7 +22,26 @@ const PLATFORM_LABELS: Record<string, string> = {
   pinterest: 'Pinterest',
 };
 
+// Per-platform character limits (0 = no limit).
+// Mirrors the limits enforced by each platform's API.
+const PLATFORM_CHAR_LIMITS: Record<string, number> = {
+  x: 280,
+  instagram: 2200,
+  facebook: 63206,
+  linkedin: 3000,
+  threads: 500,
+  tiktok: 2200,
+  'youtube-shorts': 5000,
+  pinterest: 500,
+  blog: 0,
+  newsletter: 0,
+};
+
 const COPY_FEEDBACK_MS = 1500;
+
+function formatNumber(n: number): string {
+  return n.toLocaleString('en-US');
+}
 
 export const OutputPanel: React.FC<OutputPanelProps> = ({
   results,
@@ -31,12 +50,9 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
   onShare,
   onSchedule,
 }) => {
-  // Tracks which result's Copy button was most recently clicked so we
-  // can show per-card "Copied!" feedback without affecting other cards.
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const timerRef = useRef<number | null>(null);
 
-  // Clear any pending timer on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current !== null) {
@@ -49,12 +65,9 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
     try {
       await navigator.clipboard.writeText(content);
     } catch {
-      // Clipboard API can fail on insecure contexts. Fail silently —
-      // the button just won't show "Copied!".
       return;
     }
 
-    // Cancel any previous timer so rapid clicks reset cleanly
     if (timerRef.current !== null) {
       window.clearTimeout(timerRef.current);
     }
@@ -109,12 +122,30 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
       <div className="output-results">
         {results.map((r) => {
           const justCopied = copiedId === r.id;
+          const charCount = r.content.length;
+          const limit = PLATFORM_CHAR_LIMITS[r.platform] ?? 0;
+          const isOver = limit > 0 && charCount > limit;
+
           return (
             <div key={r.id} className="output-result-card">
               <div className="output-result-header">
-                <span className="output-result-platform">
-                  {PLATFORM_LABELS[r.platform] ?? r.platform}
-                </span>
+                <div className="output-result-meta">
+                  <span className="output-result-platform">
+                    {PLATFORM_LABELS[r.platform] ?? r.platform}
+                  </span>
+                  <span
+                    className={`output-char-counter ${isOver ? 'over' : ''}`}
+                    title={
+                      limit > 0
+                        ? `${formatNumber(charCount)} of ${formatNumber(limit)} characters`
+                        : `${formatNumber(charCount)} characters`
+                    }
+                  >
+                    {limit > 0
+                      ? `${formatNumber(charCount)} / ${formatNumber(limit)} chars`
+                      : `${formatNumber(charCount)} chars`}
+                  </span>
+                </div>
                 <div className="output-result-actions">
                   <button
                     onClick={() => copyOne(r.id, r.content)}
@@ -145,6 +176,12 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
                 </div>
               </div>
               <pre className="output-result-content">{r.content}</pre>
+              {isOver && (
+                <div className="output-char-warning">
+                  ⚠️ {formatNumber(charCount - limit)} characters over the{' '}
+                  {PLATFORM_LABELS[r.platform] ?? r.platform} limit
+                </div>
+              )}
             </div>
           );
         })}
