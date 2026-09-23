@@ -64,7 +64,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
               <li>✅ 150 text generations/mo</li>
               <li>✅ All 6 platforms</li>
               <li>✅ Up to 5,000 words input</li>
-              <li>✅ 30 images/mo</li>
+              <li>✅ 5 images/mo</li>
               <li>✅ 10 videos/mo</li>
               <li>✅ Generation history</li>
             </ul>
