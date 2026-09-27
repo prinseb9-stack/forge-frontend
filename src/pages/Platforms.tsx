@@ -2,14 +2,18 @@ import { useEffect, useMemo, useState } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { PlatformCard } from '../components/PlatformCard';
-import { getConnectors } from '../services/api';
+import { ConnectModal } from '../components/ConnectModal';
+import {
+  getConnectors,
+  getConnections,
+  disconnectConnection,
+} from '../services/api';
 import {
   FALLBACK_CONNECTORS,
   type ConnectorInfo,
+  type Connection,
 } from '../types/connectors';
 
-// Category filter options (labels are pretty-cased versions of the
-// backend's category values).
 const CATEGORY_OPTIONS: { value: string; label: string }[] = [
   { value: 'all',          label: 'All' },
   { value: 'social',       label: 'Social' },
@@ -22,49 +26,65 @@ const CATEGORY_OPTIONS: { value: string; label: string }[] = [
 
 export function Platforms() {
   const [connectors, setConnectors] = useState<ConnectorInfo[]>([]);
+  const [connections, setConnections] = useState<Connection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [usedFallback, setUsedFallback] = useState(false);
 
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
 
+  const [connectPlatform, setConnectPlatform] = useState<ConnectorInfo | null>(null);
+
+  async function loadData() {
+    setIsLoading(true);
+
+    const [connectorsRes, connectionsRes] = await Promise.all([
+      getConnectors(),
+      getConnections(),
+    ]);
+
+    if (connectorsRes.success && connectorsRes.connectors.length > 0) {
+      setConnectors(connectorsRes.connectors);
+      setUsedFallback(false);
+    } else {
+      setConnectors(FALLBACK_CONNECTORS);
+      setUsedFallback(true);
+    }
+
+    if (connectionsRes.success) {
+      setConnections(connectionsRes.connections);
+    }
+
+    setIsLoading(false);
+  }
+
   useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      const response = await getConnectors();
-
-      if (cancelled) return;
-
-      if (response.success && response.connectors.length > 0) {
-        setConnectors(response.connectors);
-        setUsedFallback(false);
-      } else {
-        setConnectors(FALLBACK_CONNECTORS);
-        setUsedFallback(true);
-      }
-      setIsLoading(false);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
+    loadData();
   }, []);
 
-  // ─── Filtering ───
+  function getConnectionFor(platformId: string): Connection | undefined {
+    return connections.find((c) => c.platformId === platformId);
+  }
+
+  async function handleDisconnect(platformId: string) {
+    if (!window.confirm(`Disconnect your ${platformId} account?`)) return;
+
+    const res = await disconnectConnection(platformId);
+    if (res.success) {
+      setConnections((prev) => prev.filter((c) => c.platformId !== platformId));
+    } else {
+      alert(res.error ?? 'Failed to disconnect');
+    }
+  }
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-
     return connectors.filter((c) => {
-      // Category filter
       if (category !== 'all' && c.category !== category) return false;
-
-      // Search filter — match against id, name, or description
       if (q) {
         const haystack = `${c.id} ${c.name} ${c.description}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
-
       return true;
     });
   }, [connectors, category, search]);
@@ -87,9 +107,8 @@ export function Platforms() {
           <div className="platforms-hero">
             <h1 className="platforms-title">🌍 Connected Platforms</h1>
             <p className="platforms-subtitle">
-              Explore the platforms FORGE plans to support. Each platform
-              shows exactly what is available today and what's planned for
-              the future.
+              Connect the platforms you want to use with FORGE. Each platform
+              shows exactly what's available today and what's planned.
             </p>
           </div>
 
@@ -99,7 +118,6 @@ export function Platforms() {
             </div>
           )}
 
-          {/* Filters */}
           {!isLoading && connectors.length > 0 && (
             <div className="platforms-filters">
               <input
@@ -142,7 +160,13 @@ export function Platforms() {
           {!isLoading && filtered.length > 0 && (
             <div className="platforms-grid">
               {filtered.map((platform) => (
-                <PlatformCard key={platform.id} platform={platform} />
+                <PlatformCard
+                  key={platform.id}
+                  platform={platform}
+                  connection={getConnectionFor(platform.id)}
+                  onConnect={() => setConnectPlatform(platform)}
+                  onDisconnect={handleDisconnect}
+                />
               ))}
             </div>
           )}
@@ -170,15 +194,19 @@ export function Platforms() {
               <li><strong>Coming soon</strong> — far out; no committed timeline.</li>
               <li><strong>Unavailable</strong> — blocked by platform limits.</li>
             </ul>
-            <p>
-              We only mark something as <em>Available</em> when the
-              integration is actually working. No fake buttons.
-            </p>
           </div>
         </div>
       </main>
 
       <Footer />
+
+      <ConnectModal
+        open={connectPlatform !== null}
+        platformId={connectPlatform?.id ?? ''}
+        platformName={connectPlatform?.name ?? ''}
+        onClose={() => setConnectPlatform(null)}
+        onSuccess={loadData}
+      />
     </div>
   );
 }

@@ -1,11 +1,12 @@
 import { getIdToken } from './auth';
-import type { ConnectorsResponse } from '../types/connectors';
+import type { ConnectorsResponse, Connection } from '../types/connectors';
 
 export type {
   CapabilityStatus,
   PlatformCapabilities,
   ConnectorInfo,
   ConnectorsResponse,
+  Connection,
 } from '../types/connectors';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
@@ -354,5 +355,86 @@ export async function getConnectors(): Promise<ConnectorsResponse> {
       count: 0,
       error: 'Network error',
     };
+  }
+}
+
+// ═══ OAuth Connections (Feature #3a) ═══
+
+export interface ConnectionsResponse {
+  success: boolean;
+  connections: Connection[];
+  count: number;
+  error?: string;
+}
+
+export interface ConnectBlueskyResponse {
+  success: boolean;
+  handle?: string;
+  displayName?: string;
+  error?: string;
+  code?: string;
+}
+
+export interface DisconnectResponse {
+  success: boolean;
+  error?: string;
+}
+
+export async function getConnections(): Promise<ConnectionsResponse> {
+  const token = await getIdToken();
+  if (!token) return { success: false, connections: [], count: 0, error: 'Not signed in' };
+
+  try {
+    const res = await fetch(`${API_URL}/api/connections`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const text = await res.text();
+    if (!text) return { success: false, connections: [], count: 0, error: `Server ${res.status}` };
+    return JSON.parse(text) as ConnectionsResponse;
+  } catch {
+    return { success: false, connections: [], count: 0, error: 'Network error' };
+  }
+}
+
+export async function connectBluesky(
+  handle: string,
+  appPassword: string
+): Promise<ConnectBlueskyResponse> {
+  const token = await getIdToken();
+  if (!token) return { success: false, error: 'Not signed in', code: 'UNAUTHENTICATED' };
+
+  try {
+    const res = await fetch(`${API_URL}/api/oauth/bluesky/connect`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ handle, appPassword }),
+    });
+    const text = await res.text();
+    if (!text) return { success: false, error: `Server ${res.status}`, code: 'SERVER_ERROR' };
+    return JSON.parse(text) as ConnectBlueskyResponse;
+  } catch {
+    return { success: false, error: 'Network error', code: 'NETWORK_ERROR' };
+  }
+}
+
+export async function disconnectConnection(
+  platformId: string
+): Promise<DisconnectResponse> {
+  const token = await getIdToken();
+  if (!token) return { success: false, error: 'Not signed in' };
+
+  try {
+    const res = await fetch(`${API_URL}/api/oauth/${platformId}/disconnect`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const text = await res.text();
+    if (!text) return { success: false, error: `Server ${res.status}` };
+    return JSON.parse(text) as DisconnectResponse;
+  } catch {
+    return { success: false, error: 'Network error' };
   }
 }

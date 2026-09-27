@@ -66,3 +66,14 @@ export const FALLBACK_CONNECTORS: ConnectorInfo[] = [
     description: 'Pages, posts, and community content.', category: 'professional',
     capabilities: { connect: 'coming_soon', publish: 'planned', schedule: 'planned', analytics: 'planned' } },
 ];
+
+// ═══ OAuth Connections (Feature #3a) ═══
+
+export interface Connection {
+  platformId: string;
+  handle: string;
+  displayName?: string;
+  avatar?: string;
+  status: 'active' | 'revoked';
+  connectedAt: string;
+}
