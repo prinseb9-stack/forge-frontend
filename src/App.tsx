@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { PaymentCallback } from './pages/PaymentCallback';
 import { Platforms } from './pages/Platforms';
 import { Scheduled } from './pages/Scheduled';
+import { Studio } from './pages/Studio';
 import './App.css';
 
 function AppRouter() {
@@ -42,6 +43,10 @@ function AppRouter() {
       <Route
         path="/scheduled"
         element={user ? <Scheduled /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/studio"
+        element={user ? <Studio /> : <Navigate to="/login" replace />}
       />
 
       <Route path="*" element={<Navigate to="/" replace />} />

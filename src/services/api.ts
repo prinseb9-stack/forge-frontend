@@ -438,3 +438,101 @@ export async function disconnectConnection(
     return { success: false, error: 'Network error' };
   }
 }
+
+// ═══ Media Studio (Feature #3c) ═══
+
+export interface PresignUploadResponse {
+  success: boolean;
+  uploadUrl?: string;
+  objectKey?: string;
+  expiresAt?: string;
+  plan?: string;
+  error?: string;
+  code?: string;
+}
+
+export interface EditImageResponse {
+  success: boolean;
+  edit?: {
+    id: string;
+    resultKey: string;
+    resultUrl: string;
+    prompt: string;
+    size: string;
+    model: string;
+    createdAt: string;
+  };
+  plan?: string;
+  usage?: UsageInfo;
+  error?: string;
+  code?: string;
+}
+
+export async function presignUpload(
+  contentType: string,
+  fileSize: number
+): Promise<PresignUploadResponse> {
+  const token = await getIdToken();
+  if (!token) {
+    return { success: false, error: 'Not signed in', code: 'UNAUTHENTICATED' };
+  }
+  try {
+    const res = await fetch(`${API_URL}/api/upload/presign`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ contentType, fileSize }),
+    });
+    const text = await res.text();
+    if (!text) {
+      return { success: false, error: `Server ${res.status}`, code: 'SERVER_ERROR' };
+    }
+    return JSON.parse(text) as PresignUploadResponse;
+  } catch {
+    return { success: false, error: 'Network error', code: 'NETWORK_ERROR' };
+  }
+}
+
+export async function uploadToStorage(
+  presignedUrl: string,
+  file: File
+): Promise<void> {
+  const res = await fetch(presignedUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': file.type },
+    body: file,
+  });
+  if (!res.ok) {
+    throw new Error(`Upload failed: HTTP ${res.status}`);
+  }
+}
+
+export async function editImage(
+  objectKey: string,
+  prompt: string,
+  size: string
+): Promise<EditImageResponse> {
+  const token = await getIdToken();
+  if (!token) {
+    return { success: false, error: 'Not signed in', code: 'UNAUTHENTICATED' };
+  }
+  try {
+    const res = await fetch(`${API_URL}/api/edit/image`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ objectKey, prompt, size }),
+    });
+    const text = await res.text();
+    if (!text) {
+      return { success: false, error: `Server ${res.status}`, code: 'SERVER_ERROR' };
+    }
+    return JSON.parse(text) as EditImageResponse;
+  } catch {
+    return { success: false, error: 'Network error', code: 'NETWORK_ERROR' };
+  }
+}
