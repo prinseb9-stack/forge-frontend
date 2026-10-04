@@ -17,6 +17,8 @@ export const Studio: React.FC = () => {
     beforeUrl: string;
     afterUrl: string;
   } | null>(null);
+  
+  const [_reservationId, setReservationId] = useState<string | null>(null);
 
   const busy = stage === 'presigning' || stage === 'uploading' || stage === 'editing';
 
@@ -25,6 +27,7 @@ export const Studio: React.FC = () => {
     setError(null);
     setStorageMissing(false);
     setResult(null);
+    setReservationId(null);
 
     setStage('presigning');
     const presign = await presignUpload(file.type, file.size);
@@ -35,6 +38,10 @@ export const Studio: React.FC = () => {
       setError(presign.error ?? 'Could not prepare upload');
       setStage('error');
       return;
+    }
+
+    if (presign.reservationId) {
+      setReservationId(presign.reservationId);
     }
 
     setStage('uploading');
@@ -88,7 +95,14 @@ export const Studio: React.FC = () => {
           </div>
         )}
 
-        <MediaUploader file={file} onChange={setFile} disabled={busy} />
+        <MediaUploader
+          file={file}
+          onChange={(f) => {
+            setFile(f);
+            setReservationId(null);
+          }}
+          disabled={busy}
+        />
 
         <label className="studio-label">
           What should FORGE do?

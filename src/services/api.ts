@@ -445,6 +445,7 @@ export interface PresignUploadResponse {
   success: boolean;
   uploadUrl?: string;
   objectKey?: string;
+  reservationId?: string;
   expiresAt?: string;
   plan?: string;
   error?: string;
