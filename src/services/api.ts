@@ -513,7 +513,8 @@ export async function uploadToStorage(
 export async function editImage(
   objectKey: string,
   prompt: string,
-  size: string
+  size: string,
+  reservationId: string
 ): Promise<EditImageResponse> {
   const token = await getIdToken();
   if (!token) {
@@ -526,7 +527,7 @@ export async function editImage(
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ objectKey, prompt, size }),
+      body: JSON.stringify({ objectKey, prompt, size, reservationId }),
     });
     const text = await res.text();
     if (!text) {

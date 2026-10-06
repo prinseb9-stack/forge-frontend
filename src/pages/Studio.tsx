@@ -18,7 +18,7 @@ export const Studio: React.FC = () => {
     afterUrl: string;
   } | null>(null);
   
-  const [_reservationId, setReservationId] = useState<string | null>(null);
+  const [reservationId, setReservationId] = useState<string | null>(null);
 
   const busy = stage === 'presigning' || stage === 'uploading' || stage === 'editing';
 
@@ -53,8 +53,14 @@ export const Studio: React.FC = () => {
       return;
     }
 
+    if (!reservationId) {
+      setError('Missing reservation — please try again');
+      setStage('error');
+      return;
+    }
+
     setStage('editing');
-    const edited = await editImage(presign.objectKey, prompt.trim(), '1024x1024');
+    const edited = await editImage(presign.objectKey, prompt.trim(), '1024x1024', reservationId);
     if (!edited.success || !edited.edit) {
       setError(edited.error ?? 'Edit failed');
       setStage('error');
